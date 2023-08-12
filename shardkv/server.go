@@ -1,11 +1,11 @@
 package shardkv
 
 import (
-	"IFS/labgob"
 	"IFS/labrpc"
 	"IFS/raft"
 	"IFS/shardctrler"
 	"bytes"
+	"encoding/gob"
 	"fmt"
 	"strconv"
 	"sync"
@@ -433,7 +433,7 @@ func (kv *ShardKV) serverable(shardId int) bool {
 
 func (kv *ShardKV) getEncodeStateL() []byte {
 	w := new(bytes.Buffer)
-	e := labgob.NewEncoder(w)
+	e := gob.NewEncoder(w)
 	e.Encode(kv.stateMachine)
 	e.Encode(kv.lastApplied)
 	e.Encode(kv.lastcfg)
@@ -447,7 +447,7 @@ func (kv *ShardKV) readPersistL(data []byte) {
 	}
 	DPrintf(DDrop, "S%v gid:%v readPersist", kv.me, kv.gid)
 	r := bytes.NewBuffer(data)
-	d := labgob.NewDecoder(r)
+	d := gob.NewDecoder(r)
 	var lastApplied int
 	var stateMachine map[int]*Shard
 	var lastcfg shardctrler.Config
@@ -524,14 +524,14 @@ func (kv *ShardKV) daemon(f func(), duration time.Duration) {
 // StartServer() must return quickly, so it should start goroutines
 // for any long-running work.
 func StartServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persister, maxraftstate int, gid int, ctrlers []*labrpc.ClientEnd, makeEnd func(string) *labrpc.ClientEnd) *ShardKV {
-	// call labgob.Register on structures you want
+	// call gob.Register on structures you want
 	// Go's RPC library to marshall/unmarshall.
-	labgob.Register(Command{})
-	labgob.Register(CommandArgs{})
-	labgob.Register(CommandResp{})
-	labgob.Register(ShardArgs{})
-	labgob.Register(ShardResp{})
-	labgob.Register(shardctrler.Config{})
+	gob.Register(Command{})
+	gob.Register(CommandArgs{})
+	gob.Register(CommandResp{})
+	gob.Register(ShardArgs{})
+	gob.Register(ShardResp{})
+	gob.Register(shardctrler.Config{})
 
 	kv := &ShardKV{
 		mu:               sync.Mutex{},

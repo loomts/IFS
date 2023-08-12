@@ -1,9 +1,9 @@
 package raft
 
 import (
-	"IFS/labgob"
 	"IFS/labrpc"
 	"bytes"
+	"encoding/gob"
 	"log"
 	"math/rand"
 	"runtime"
@@ -181,7 +181,7 @@ func (cfg *config) ingestSnap(i int, snapshot []byte, index int) string {
 		return "nil snapshot"
 	}
 	r := bytes.NewBuffer(snapshot)
-	d := labgob.NewDecoder(r)
+	d := gob.NewDecoder(r)
 	var lastIncludedIndex int
 	var xlog []interface{}
 	if d.Decode(&lastIncludedIndex) != nil ||
@@ -242,7 +242,7 @@ func (cfg *config) applierSnap(i int, applyCh chan ApplyMsg) {
 
 			if (m.CommandIndex+1)%SnapShotInterval == 0 {
 				w := new(bytes.Buffer)
-				e := labgob.NewEncoder(w)
+				e := gob.NewEncoder(w)
 				e.Encode(m.CommandIndex)
 				var xlog []interface{}
 				for j := 0; j <= m.CommandIndex; j++ {

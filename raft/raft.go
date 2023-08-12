@@ -18,9 +18,9 @@ package raft
 //
 
 import (
-	"IFS/labgob"
 	"IFS/labrpc"
 	"bytes"
+	"encoding/gob"
 	"math/rand"
 	"sync"
 	"sync/atomic"
@@ -170,7 +170,7 @@ func (rf *Raft) changeStateL(state int, args ...int) {
 
 func (rf *Raft) getEncodeStateL() []byte {
 	w := new(bytes.Buffer)
-	e := labgob.NewEncoder(w)
+	e := gob.NewEncoder(w)
 	e.Encode(rf.currentTerm)
 	e.Encode(rf.votedFor)
 	e.Encode(rf.log)
@@ -204,7 +204,7 @@ func (rf *Raft) readPersist(data []byte) {
 		return
 	}
 	r := bytes.NewBuffer(data)
-	d := labgob.NewDecoder(r)
+	d := gob.NewDecoder(r)
 	var currentTerm int
 	var votedFor int
 	var log []Entry
