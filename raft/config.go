@@ -1,7 +1,6 @@
 package raft
 
 import (
-	"IFS/labrpc"
 	"bytes"
 	"encoding/gob"
 	"log"

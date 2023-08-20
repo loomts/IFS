@@ -3,6 +3,7 @@ title: "IDFS"
 date: 2023-08-05T14:51:11+08:00
 draft: true
 ---
+# 设计
 
 ## 文件系统
 GFS、HDFS、NAS、TFS、FastgDFS、Facebook Haystack、seaweedfs
@@ -65,3 +66,11 @@ client, config server, chunk server
 - 负载均衡
 - 快照
 - Volume，Object
+
+
+# 开发
+## gRPC
+```zsh
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./pb/*.proto
+```
+因为自动生成的代码只能是int32或int64，为了方便，把生成代码的int32全都替换成int
