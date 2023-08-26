@@ -1,6 +1,7 @@
-package shardctrler
+package utils
 
 import (
+	"IFS/shardkv"
 	"fmt"
 	"log"
 	"os"
@@ -89,6 +90,17 @@ func DeepCopy(sth interface{}) interface{} {
 		res := make([]string, len(t))
 		copy(res, t)
 		return res
+	case *shardkv.Shard:
+		lastCommand := make(map[int64]int)
+		logs := make(map[string]string)
+		for k, v := range t.Log {
+			logs[k] = v
+		}
+		for k, v := range t.LastCommand {
+			lastCommand[k] = v
+		}
+		res := shardkv.Shard{Log: logs, LastCommand: lastCommand, Status: t.Status}
+		return &res
 	}
 	return ""
 }

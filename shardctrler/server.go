@@ -2,6 +2,7 @@ package shardctrler
 
 import (
 	"IFS/raft"
+	"IFS/utils"
 	"encoding/gob"
 	"sort"
 	"sync/atomic"
@@ -42,11 +43,11 @@ func (sc *ShardCtrler) isDuplicatedL(clientId int64, commandId int) bool {
 }
 
 func (sc *ShardCtrler) Command(args *CommandArgs, resp *CommandResp) {
-	DPrintf(DServer, "S%v <- C%v [%v]", sc.me, args.ClientId, *args)
+	utils.DPrintf(utils.DServer, "S%v <- C%v [%v]", sc.me, args.ClientId, *args)
 	sc.mu.Lock()
 	if args.Op != Query && sc.isDuplicatedL(args.ClientId, args.CommandId) {
 		sc.mu.Unlock()
-		DPrintf(DWarn, "S%v <- C%v cmd duplicated", sc.me, args.ClientId)
+		utils.DPrintf(utils.DWarn, "S%v <- C%v cmd duplicated", sc.me, args.ClientId)
 		resp.Err = OK
 		return
 	}
@@ -54,7 +55,7 @@ func (sc *ShardCtrler) Command(args *CommandArgs, resp *CommandResp) {
 	index, _, successful := sc.rf.Start(*args)
 	if !successful {
 		resp.Err = ErrWrongLeader
-		DPrintf(DWarn, "S%v <- C%v cmd wrongLeader", sc.me, args.ClientId)
+		utils.DPrintf(utils.DWarn, "S%v <- C%v cmd wrongLeader", sc.me, args.ClientId)
 		return
 	}
 	sc.mu.Lock()
@@ -62,11 +63,11 @@ func (sc *ShardCtrler) Command(args *CommandArgs, resp *CommandResp) {
 	sc.mu.Unlock()
 	select {
 	case <-time.After(applyTimeout):
-		DPrintf(DServer, "S%v <- C%v cmd timeout", sc.me, args.ClientId)
+		utils.DPrintf(utils.DServer, "S%v <- C%v cmd timeout", sc.me, args.ClientId)
 		resp.Err = ErrTimeout
 	case reply := <-ch:
 		resp.Err = OK
-		DPrintf(DServer, "S%v -> C%v-%v %v(%v):%v", sc.me, args.ClientId, args.CommandId, args.Op, args.Num, reply)
+		utils.DPrintf(utils.DServer, "S%v -> C%v-%v %v(%v):%v", sc.me, args.ClientId, args.CommandId, args.Op, args.Num, reply)
 		if args.Op == Query {
 			resp.Config = reply.Config
 		}
@@ -78,11 +79,11 @@ func (sc *ShardCtrler) applier() {
 		case msg := <-sc.applyCh:
 			if msg.CommandValid {
 				cmd := msg.Command.(CommandArgs)
-				DPrintf(DServer, "S%v apply cmd[%v]", sc.me, cmd)
+				utils.DPrintf(utils.DServer, "S%v apply cmd[%v]", sc.me, cmd)
 				sc.mu.Lock()
 				if msg.CommandIndex <= sc.lastApplied {
 					sc.mu.Unlock()
-					DPrintf(DServer, "S%v applied commandIndex%v", sc.me, msg.CommandIndex)
+					utils.DPrintf(utils.DServer, "S%v applied commandIndex%v", sc.me, msg.CommandIndex)
 					continue
 				}
 				if cmd.Op == Query || !sc.isDuplicatedL(cmd.ClientId, cmd.CommandId) {
@@ -160,7 +161,7 @@ func (sc *ShardCtrler) ShardsFiter(Shards *[NShards]int, Newgids *[]int) map[int
 }
 func (sc *ShardCtrler) JoinL(groups map[int][]string) CommandResp {
 	lastConfig := sc.configs[len(sc.configs)-1]
-	newConfig := Config{len(sc.configs), lastConfig.Shards, DeepCopy(lastConfig.Groups).(map[int][]string)}
+	newConfig := Config{len(sc.configs), lastConfig.Shards, utils.DeepCopy(lastConfig.Groups).(map[int][]string)}
 	var newgids []int
 	for gid, servers := range groups {
 		if _, ok := newConfig.Groups[gid]; !ok {
@@ -184,7 +185,7 @@ func (sc *ShardCtrler) JoinL(groups map[int][]string) CommandResp {
 
 func (sc *ShardCtrler) LeaveL(gids []int) CommandResp {
 	lastConfig := sc.configs[len(sc.configs)-1]
-	newConfig := Config{len(sc.configs), lastConfig.Shards, DeepCopy(lastConfig.Groups).(map[int][]string)}
+	newConfig := Config{len(sc.configs), lastConfig.Shards, utils.DeepCopy(lastConfig.Groups).(map[int][]string)}
 
 	g2s := sc.ShardsFiter(&newConfig.Shards, &[]int{})
 	//fmt.Printf("LeaveL g2s:%v\n", g2s)
@@ -231,7 +232,7 @@ func (sc *ShardCtrler) LeaveL(gids []int) CommandResp {
 }
 func (sc *ShardCtrler) MoveL(shardid int, gid int) CommandResp {
 	lastConfig := sc.configs[len(sc.configs)-1]
-	newConfig := Config{len(sc.configs), lastConfig.Shards, DeepCopy(lastConfig.Groups).(map[int][]string)}
+	newConfig := Config{len(sc.configs), lastConfig.Shards, utils.DeepCopy(lastConfig.Groups).(map[int][]string)}
 	var newShards [NShards]int
 	for i := 0; i < NShards; i++ {
 		newShards[i] = newConfig.Shards[i]
@@ -264,7 +265,7 @@ func (sc *ShardCtrler) QueryL(num int) CommandResp {
 func (sc *ShardCtrler) Kill() {
 	atomic.StoreInt32(&sc.dead, 1)
 	sc.rf.Kill()
-	DPrintf(DDrop, "S%v dead", sc.me)
+	utils.DPrintf(utils.DDrop, "S%v dead", sc.me)
 }
 
 func (sc *ShardCtrler) killed() bool {

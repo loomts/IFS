@@ -1,6 +1,7 @@
 package raft
 
 import (
+	"IFS/utils"
 	"bytes"
 	"encoding/gob"
 	"log"
@@ -351,7 +352,7 @@ func (cfg *config) cleanup() {
 
 // attach server i to the net.
 func (cfg *config) connect(i int) {
-	DPrintf(dLog, "S%v connect", i)
+	utils.DPrintf(utils.dLog, "S%v connect", i)
 
 	cfg.connected[i] = true
 
@@ -374,7 +375,7 @@ func (cfg *config) connect(i int) {
 
 // detach server i from the net.
 func (cfg *config) disconnect(i int) {
-	DPrintf(dLog, "S%v disconnect", i)
+	utils.DPrintf(utils.dLog, "S%v disconnect", i)
 
 	cfg.connected[i] = false
 

@@ -8,12 +8,16 @@ package raft
 // test with the original before submitting.
 //
 
-import "testing"
-import "fmt"
-import "time"
-import "math/rand"
-import "sync/atomic"
-import "sync"
+import (
+	"IFS/rpc/pb"
+	"fmt"
+	"google.golang.org/protobuf/types/known/anypb"
+	"math/rand"
+	"sync"
+	"sync/atomic"
+	"testing"
+	"time"
+)
 
 // The tester generously allows solutions to complete elections in one second
 // (much more than the paper's range of timeouts).
@@ -204,7 +208,7 @@ func For2023TestFollowerFailure2B(t *testing.T) {
 	cfg.disconnect((leader2 + 2) % servers)
 
 	// submit a command.
-	index, _, ok := cfg.rafts[leader2].Start(104)
+	index, _, ok := cfg.rafts[leader2].Start(&pb.Command{Data: anypb.New()})
 	if ok != true {
 		t.Fatalf("leader rejected Start()")
 	}

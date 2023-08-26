@@ -1,0 +1,65 @@
+// cd $GOPATH/src && git clone https://github.com/protocolbuffers/protobuf.git
+// protoc --go_out=pb --go_opt=paths=source_relative --go-grpc_out=pb --go-grpc_opt=paths=source_relative -I pb -I ../protobuf/src pb/IFS.proto
+syntax = "proto3";
+
+package pb;
+
+option go_package = "IFS/pb";
+
+import "google/protobuf/any.proto";
+
+service RaftService {
+  rpc AppendEntries (AppendEntriesArgs) returns (AppendEntriesReply);
+  rpc RequestVote (RequestVoteArgs) returns (RequestVoteReply);
+  rpc InstallSnapshot(SnapshotArgs) returns (SnapshotReply);
+}
+
+message Command{
+  google.protobuf.Any data = 1;
+}
+
+message Entry {
+  Command Command = 1;      // Command for state machine, unknown type
+  int32 Term = 2;         // Command received Term
+  int32 Index = 3;
+}
+
+message AppendEntriesArgs {
+  int32 term = 1;
+  int32 leader_id = 2;
+  int32 prev_log_index = 3;
+  int32 prev_log_term = 4;
+  repeated Entry entries = 5;
+  int32 leader_commit = 6;
+}
+
+message AppendEntriesReply {
+  int32 term = 1;
+  bool success = 2;
+  int32 x_term = 3;
+  int32 x_index = 4;
+}
+
+message SnapshotArgs {
+  int32 term = 1;
+  int32 leader_id = 2;
+  int32 last_included_index = 3;
+  int32 last_included_term = 4;
+  bytes snapshot = 5;
+}
+
+message SnapshotReply {
+  int32 term = 1;
+}
+
+message RequestVoteArgs {
+  int32 term = 1;
+  int32 candidate_id = 2;
+  int32 last_log_index = 3;
+  int32 last_log_term = 4;
+}
+
+message RequestVoteReply {
+  int32 term = 1;
+  bool vote_granted = 2;
+}
