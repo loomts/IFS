@@ -1,20 +1,16 @@
 ## IFS
 ### TODO 
 - 6.824 Raft refactor
-
--[ ] gRPC interface design
--[ ] rpc util
--[ ] config
--[ ] raft refactor
--[ ] client
--[ ] ctrler server
--[ ] kv server
--[ ] persistence
-
+- [ ] gRPC interface design
+- [ ] rpc util
+- [ ] config
+- [ ] raft refactor
+- [ ] client
+- [ ] ctrler server
+- [ ] kv server
+- [ ] persistence
 - IFS interface design
-
--[ ] gRPC interface design
-
+- [ ] gRPC interface design
 - Caddy file manager
 
 ### Image File System interfaces
