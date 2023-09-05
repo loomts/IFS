@@ -8,7 +8,7 @@
 - [ ] client
 - [ ] ctrler server
 - [ ] kv server
-- [ ] persistence
+- [ ] persistence(RocksDB)
 - IFS interface design
 - [ ] gRPC interface design
 - Caddy file manager
@@ -32,3 +32,16 @@
 ### Architectural
 
 client, config server, chunk server
+
+### Reference
+https://github.com/tikv/tikv
+
+https://github.com/seaweedfs/seaweedfs
+
+https://github.com/qinguoyi/osproxy/tree/main
+
+https://github.com/Kirov7/FayDFS
+
+https://github.com/colinmarc/hdfs
+
+https://github.com/etcd-io/etcd
